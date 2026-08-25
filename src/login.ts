@@ -40,13 +40,17 @@ function required(name: string): string {
 }
 
 function openBrowser(url: string): void {
-  const cmd =
-    process.platform === "darwin"
-      ? "open"
-      : process.platform === "win32"
-        ? "start"
-        : "xdg-open";
-  const child = spawn(cmd, [url], { stdio: "ignore", detached: true });
+  // `start` is a cmd.exe builtin, not a binary — must spawn via cmd on Windows.
+  const child =
+    process.platform === "win32"
+      ? spawn("cmd", ["/c", "start", "", url], {
+          stdio: "ignore",
+          detached: true,
+        })
+      : spawn(process.platform === "darwin" ? "open" : "xdg-open", [url], {
+          stdio: "ignore",
+          detached: true,
+        });
   child.unref();
 }
 
