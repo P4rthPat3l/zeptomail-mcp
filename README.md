@@ -28,10 +28,12 @@ This gives you a `zeptomail-mcp` command on your PATH. Skip this if you'd rather
 ### 3. Get a refresh token
 
 ```bash
-ZOHO_CLIENT_ID=<your-client-id> ZOHO_CLIENT_SECRET=<your-secret> npm run login
+ZOHO_CLIENT_ID=<your-client-id> ZOHO_CLIENT_SECRET=<your-secret> zeptomail-mcp-login
 ```
 
 Your browser opens Zoho's consent screen for scopes `Zeptomail.MailAgents.READ` + `Zeptomail.MailTemplates.All`. After you approve, the script prints a refresh token.
+
+> If you're running from a local clone instead of a global install, this same command is `npm run login`.
 
 ### 4. Configure your MCP host
 
@@ -87,7 +89,7 @@ Ask your agent to call the tools:
 
 ## Self Client setup
 
-A Self Client has no redirect URI, so `npm run login` cannot catch its callback. Instead:
+A Self Client has no redirect URI, so `zeptomail-mcp-login` cannot catch its callback. Instead:
 
 1. API Console → Self Client → **Generate Code**.
 2. Scope: `Zeptomail.MailAgents.READ,Zeptomail.MailTemplates.All` → CREATE.
