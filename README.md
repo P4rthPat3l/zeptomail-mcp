@@ -6,18 +6,26 @@ It intentionally does **not** send email, create/delete Agents, expose Send Mail
 
 ## Quickstart (local, ~5 minutes)
 
-### 1. Create a Zoho OAuth app
+### 1. Install the server
+
+```bash
+npm i -g zeptomail-mcp
+```
+
+This gives you a `zeptomail-mcp` command on your PATH. Skip this if you'd rather run from a local clone of [the repo](https://github.com/P4rthPat3l/zeptomail-mcp) (`node /path/to/zeptomail-mcp/dist/src/server.js`).
+
+### 2. Create a Zoho OAuth app
 
 1. Open the [Zoho API Console](https://api-console.zoho.com/).
 2. Create a **Server-based Application**:
    - Client name: `zeptomailmcp` (no hyphens — Zoho rejects them)
-   - Homepage URL: anything, e.g. `https://github.com/proposalbiz/zeptomail-mcp`
-   - **Authorized Redirect URI: `http://localhost:4567/callback`**
+   - Homepage URL: anything, e.g. `https://github.com/P4rthPat3l/zeptomail-mcp`
+   - **Authorized redirect URI: `http://localhost:4567/callback`**
 3. Note the **Client ID** and **Client Secret**.
 
 > A Self Client also works. It has no redirect URI field, so instead of step 2 use its **Generate Code** tab (see _Self Client setup_ below).
 
-### 2. Get a refresh token
+### 3. Get a refresh token
 
 ```bash
 ZOHO_CLIENT_ID=<your-client-id> ZOHO_CLIENT_SECRET=<your-secret> npm run login
@@ -25,7 +33,7 @@ ZOHO_CLIENT_ID=<your-client-id> ZOHO_CLIENT_SECRET=<your-secret> npm run login
 
 Your browser opens Zoho's consent screen for scopes `Zeptomail.MailAgents.READ` + `Zeptomail.MailTemplates.All`. After you approve, the script prints a refresh token.
 
-### 3. Configure your MCP host
+### 4. Configure your MCP host
 
 **opencode** — add to `opencode.json` (or `.opencode/opencode.json` in a project):
 
@@ -34,7 +42,7 @@ Your browser opens Zoho's consent screen for scopes `Zeptomail.MailAgents.READ` 
   "mcp": {
     "zeptomail": {
       "type": "local",
-      "command": ["node", "/absolute/path/to/zeptomail-mcp/dist/src/server.js"],
+      "command": ["zeptomail-mcp"],
       "enabled": true,
       "environment": {
         "ZOHO_CLIENT_ID": "...",
@@ -47,14 +55,15 @@ Your browser opens Zoho's consent screen for scopes `Zeptomail.MailAgents.READ` 
 }
 ```
 
+If you installed from a local clone instead, replace `["zeptomail-mcp"]` with `["node", "/absolute/path/to/zeptomail-mcp/dist/src/server.js"]`.
+
 **Claude Desktop** — `claude_desktop_config.json`:
 
 ```json
 {
   "mcpServers": {
     "zeptomail": {
-      "command": "node",
-      "args": ["<absolute/path/to/zeptomail-mcp/dist/src/server.js>"],
+      "command": "zeptomail-mcp",
       "env": {
         "ZOHO_CLIENT_ID": "...",
         "ZOHO_CLIENT_SECRET": "...",
@@ -66,7 +75,9 @@ Your browser opens Zoho's consent screen for scopes `Zeptomail.MailAgents.READ` 
 }
 ```
 
-### 4. Use it
+If you installed from a local clone, replace `"command": "zeptomail-mcp"` with `"command": "node"` and add `"args": ["/absolute/path/to/zeptomail-mcp/dist/src/server.js"]`.
+
+### 5. Use it
 
 Ask your agent to call the tools:
 

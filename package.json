@@ -4,6 +4,20 @@
   "type": "module",
   "description": "MCP server for safely managing Zoho ZeptoMail templates across multiple Agents",
   "license": "MIT",
+  "author": "Parth Patel",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/P4rthPat3l/zeptomail-mcp.git"
+  },
+  "homepage": "https://github.com/P4rthPat3l/zeptomail-mcp#readme",
+  "keywords": [
+    "mcp",
+    "zeptomail",
+    "zoho",
+    "email-templates",
+    "model-context-protocol",
+    "mcp-server"
+  ],
   "bin": {
     "zeptomail-mcp": "./dist/src/cli.js"
   },
