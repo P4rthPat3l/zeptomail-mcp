@@ -37,7 +37,52 @@ Your browser opens Zoho's consent screen for scopes `Zeptomail.MailAgents.READ` 
 
 ### 4. Configure your MCP host
 
-**opencode** — add to `opencode.json` (or `.opencode/opencode.json` in a project):
+You can pass the Zoho credentials **inline** in the host config, or load them from a **`.env` file** so the config file itself stays secret-free. Both work; pick one.
+
+#### Option A — load from a `.env` file (recommended)
+
+Put the secrets in a `.env` file (gitignore it — it's a credential):
+
+```bash
+# .env
+ZOHO_CLIENT_ID=<your-client-id>
+ZOHO_CLIENT_SECRET=<your-secret>
+ZOHO_REFRESH_TOKEN=<your-refresh-token>
+ZOHO_ACCOUNTS_URL=https://accounts.zoho.com
+```
+
+Then point the server at it with `--env-file`. The path is resolved relative to the host's working directory; use an absolute path if unsure.
+
+**opencode** — `opencode.json` (or `.opencode/opencode.json`):
+
+```json
+{
+  "mcp": {
+    "zeptomail": {
+      "type": "local",
+      "command": ["zeptomail-mcp", "--env-file=/absolute/path/to/.env"],
+      "enabled": true
+    }
+  }
+}
+```
+
+**Claude Desktop** — `claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "zeptomail": {
+      "command": "zeptomail-mcp",
+      "args": ["--env-file=/absolute/path/to/.env"]
+    }
+  }
+}
+```
+
+#### Option B — inline in the host config
+
+**opencode** — `opencode.json` (or `.opencode/opencode.json`):
 
 ```json
 {
@@ -57,8 +102,6 @@ Your browser opens Zoho's consent screen for scopes `Zeptomail.MailAgents.READ` 
 }
 ```
 
-If you installed from a local clone instead, replace `["zeptomail-mcp"]` with `["node", "/absolute/path/to/zeptomail-mcp/dist/src/server.js"]`.
-
 **Claude Desktop** — `claude_desktop_config.json`:
 
 ```json
@@ -77,7 +120,13 @@ If you installed from a local clone instead, replace `["zeptomail-mcp"]` with `[
 }
 ```
 
-If you installed from a local clone, replace `"command": "zeptomail-mcp"` with `"command": "node"` and add `"args": ["/absolute/path/to/zeptomail-mcp/dist/src/server.js"]`.
+#### Running from a local clone instead of a global install
+
+Run the built launcher directly with `node`. It parses `--env-file` the same way the global `zeptomail-mcp` command does, so the flag goes **after** the script:
+
+- opencode (Option A env-file): `["node", "/absolute/path/to/zeptomail-mcp/dist/src/cli.js", "--env-file=/absolute/path/to/.env"]`
+- opencode (Option B inline): `["node", "/absolute/path/to/zeptomail-mcp/dist/src/cli.js"]` + the `environment` block
+- Claude Desktop: `"command": "node"`, `"args": [".../dist/src/cli.js", "--env-file=..."]` (or just `[".../dist/src/cli.js"]` with the `env` block)
 
 ### 5. Use it
 
@@ -137,6 +186,8 @@ Every write also requires the exact `agentKey` and `expectedAgentName` from a fr
 | `ZEPTOMAIL_MCP_ALLOW_WRITES`       | no          | `false`                          | Set `true` to enable create/update/delete                       |
 | `ZEPTOMAIL_MCP_ALLOWED_AGENT_KEYS` | no          | all agents                       | Comma-separated `mailagent_key` allowlist                       |
 | `ZEPTOMAIL_MCP_TRANSPORT`          | no          | `stdio`                          | `http` enables the hosted OAuth mode (below)                    |
+
+All variables can be provided either as process environment variables (set by the host config) or via a `--env-file=<path>` argument to the server (see _Configure your MCP host_ above). Process vars take precedence; the file only fills vars that are unset.
 
 ## Hosted (remote) mode with OAuth 2.0 + PKCE
 
