@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "zeptomail": {
+      "command": "node",
+      "args": ["/absolute/path/to/zeptomail-mcp/dist/src/server.js"],
+      "env": {
+        "ZOHO_CLIENT_ID": "...",
+        "ZOHO_CLIENT_SECRET": "...",
+        "ZOHO_REFRESH_TOKEN": "...",
+        "ZOHO_ACCOUNTS_URL": "https://accounts.zoho.com",
+        "ZEPTOMAIL_API_BASE_URL": "https://api.zeptomail.com/v1.1",
+        "ZEPTOMAIL_MCP_ALLOW_WRITES": "false"
+      }
+    }
+  }
+}
