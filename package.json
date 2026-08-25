@@ -1,6 +1,6 @@
 {
   "name": "zeptomail-mcp",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "type": "module",
   "description": "MCP server for safely managing Zoho ZeptoMail templates across multiple Agents",
   "license": "MIT",

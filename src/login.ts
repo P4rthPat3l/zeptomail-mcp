@@ -13,7 +13,7 @@ import { readFileSync, existsSync } from "node:fs";
 import { spawn } from "node:child_process";
 
 const CALLBACK_PORT = 4567;
-const CALLBACK_PATH = "/oauth/callback";
+const CALLBACK_PATH = "/callback";
 const REDIRECT_URI = `http://localhost:${CALLBACK_PORT}${CALLBACK_PATH}`;
 const SCOPES = "Zeptomail.MailAgents.READ Zeptomail.MailTemplates.All";
 
