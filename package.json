@@ -4,11 +4,12 @@
   "type": "module",
   "description": "MCP server for safely managing Zoho ZeptoMail templates across multiple Agents",
   "bin": {
-    "zeptomail-mcp": "./dist/src/server.js"
+    "zeptomail-mcp": "./dist/src/cli.js"
   },
   "files": [
     "dist",
-    "README.md"
+    "README.md",
+    "LICENSE"
   ],
   "scripts": {
     "dev": "tsx src/server.ts",
