@@ -1,8 +1,9 @@
 {
   "name": "zeptomail-mcp",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "type": "module",
   "description": "MCP server for safely managing Zoho ZeptoMail templates across multiple Agents",
+  "license": "MIT",
   "bin": {
     "zeptomail-mcp": "./dist/src/cli.js"
   },
