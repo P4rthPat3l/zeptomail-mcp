@@ -1,4 +1,4 @@
-import type { Config } from './config.js';
+import type { Config } from "./config.js";
 import type {
   AgentListResponse,
   ScopedTemplateSummary,
@@ -7,8 +7,8 @@ import type {
   TemplateMutationResponse,
   ZeptoMailAgent,
   ZeptoMailTemplate,
-} from './types.js';
-import { ZohoOAuthTokenProvider } from './zoho-oauth.js';
+} from "./types.js";
+import { ZohoOAuthTokenProvider } from "./zoho-oauth.js";
 
 type FetchLike = typeof fetch;
 type RequestBody = Record<string, unknown>;
@@ -25,7 +25,7 @@ export class ZeptoMailApiError extends Error {
     readonly responseBody: unknown,
   ) {
     super(message);
-    this.name = 'ZeptoMailApiError';
+    this.name = "ZeptoMailApiError";
   }
 }
 
@@ -75,12 +75,17 @@ export class ZeptoMailClient {
     return `${this.templateCollectionUrl(agentKey)}/${encodeURIComponent(templateKey)}`;
   }
 
-  private async request<T>(url: string, init: RequestInit, retryAuth = true): Promise<T> {
+  private async request<T>(
+    url: string,
+    init: RequestInit,
+    retryAuth = true,
+  ): Promise<T> {
     const accessToken = await this.tokenProvider.getAccessToken();
     const headers = new Headers(init.headers);
-    headers.set('Authorization', `Zoho-oauthtoken ${accessToken}`);
-    headers.set('Accept', 'application/json');
-    if (init.body && !headers.has('Content-Type')) headers.set('Content-Type', 'application/json');
+    headers.set("Authorization", `Zoho-oauthtoken ${accessToken}`);
+    headers.set("Accept", "application/json");
+    if (init.body && !headers.has("Content-Type"))
+      headers.set("Content-Type", "application/json");
 
     const response = await this.fetchImpl(url, { ...init, headers });
 
@@ -111,18 +116,26 @@ export class ZeptoMailClient {
   }
 
   async listAgents(): Promise<ZeptoMailAgent[]> {
-    const result = await this.request<AgentListResponse>(this.agentsUrl(), { method: 'GET' });
+    const result = await this.request<AgentListResponse>(this.agentsUrl(), {
+      method: "GET",
+    });
     const agents = result.data ?? [];
     if (!this.config.allowedAgentKeys?.length) return agents;
-    return agents.filter((agent) => this.config.allowedAgentKeys!.includes(agent.mailagent_key));
+    return agents.filter((agent) =>
+      this.config.allowedAgentKeys!.includes(agent.mailagent_key),
+    );
   }
 
   async getAgent(agentKey: string): Promise<ZeptoMailAgent> {
     this.assertAgentAllowed(agentKey);
     const agents = await this.listAgents();
-    const agent = agents.find((candidate) => candidate.mailagent_key === agentKey);
+    const agent = agents.find(
+      (candidate) => candidate.mailagent_key === agentKey,
+    );
     if (!agent)
-      throw new Error(`No accessible ZeptoMail Agent found for key ${JSON.stringify(agentKey)}.`);
+      throw new Error(
+        `No accessible ZeptoMail Agent found for key ${JSON.stringify(agentKey)}.`,
+      );
     return agent;
   }
 
@@ -140,18 +153,27 @@ export class ZeptoMailClient {
     return agent;
   }
 
-  async listTemplates(agentKey: string, offset = 0, limit = 50): Promise<TemplateListResponse> {
+  async listTemplates(
+    agentKey: string,
+    offset = 0,
+    limit = 50,
+  ): Promise<TemplateListResponse> {
     const url = new URL(this.templateCollectionUrl(agentKey));
-    url.searchParams.set('offset', String(offset));
-    url.searchParams.set('limit', String(limit));
-    return this.request<TemplateListResponse>(url.toString(), { method: 'GET' });
+    url.searchParams.set("offset", String(offset));
+    url.searchParams.set("limit", String(limit));
+    return this.request<TemplateListResponse>(url.toString(), {
+      method: "GET",
+    });
   }
 
-  async getTemplate(agentKey: string, templateKey: string): Promise<ZeptoMailTemplate> {
+  async getTemplate(
+    agentKey: string,
+    templateKey: string,
+  ): Promise<ZeptoMailTemplate> {
     const result = await this.request<TemplateGetResponse>(
       this.templateUrl(agentKey, templateKey),
       {
-        method: 'GET',
+        method: "GET",
       },
     );
     if (!result.data) {
@@ -160,6 +182,36 @@ export class ZeptoMailClient {
       );
     }
     return result.data;
+  }
+
+  /**
+   * Fetch every full template from one Agent, paginating through the list and
+   * calling getTemplate on each. Returns each template's full HTML/text body
+   * plus metadata, ready for the agent to write to local files as a backup.
+   */
+  async exportTemplates(agentKey: string): Promise<ZeptoMailTemplate[]> {
+    const all: ZeptoMailTemplate[] = [];
+    let offset = 0;
+    const pageSize = 50;
+    // Upper bound to prevent runaway loops against a misbehaving API.
+    const maxTemplates = 1000;
+
+    while (all.length < maxTemplates) {
+      const page = await this.listTemplates(agentKey, offset, pageSize);
+      const summaries = page.data ?? [];
+      if (summaries.length === 0) break;
+
+      for (const summary of summaries) {
+        const full = await this.getTemplate(agentKey, summary.template_key);
+        all.push(full);
+      }
+
+      const count = page.metadata?.count ?? summaries.length;
+      if (count < pageSize) break;
+      offset += summaries.length;
+    }
+
+    return all;
   }
 
   private async findTemplatesInAgent(
@@ -173,12 +225,20 @@ export class ZeptoMailClient {
     const pageSize = 50;
 
     while (matches.length < maxResults) {
-      const page = await this.listTemplates(agent.mailagent_key, offset, pageSize);
+      const page = await this.listTemplates(
+        agent.mailagent_key,
+        offset,
+        pageSize,
+      );
       const templates = page.data ?? [];
       for (const template of templates) {
-        const haystack = [template.template_name, template.template_alias, template.subject]
+        const haystack = [
+          template.template_name,
+          template.template_alias,
+          template.subject,
+        ]
           .filter(Boolean)
-          .join('\n')
+          .join("\n")
           .toLowerCase();
         if (haystack.includes(normalized)) matches.push({ agent, template });
         if (matches.length >= maxResults) break;
@@ -207,7 +267,9 @@ export class ZeptoMailClient {
     for (const agent of agents) {
       const remaining = maxResults - matches.length;
       if (remaining <= 0) break;
-      matches.push(...(await this.findTemplatesInAgent(agent, query, remaining)));
+      matches.push(
+        ...(await this.findTemplatesInAgent(agent, query, remaining)),
+      );
     }
     return matches;
   }
@@ -219,7 +281,7 @@ export class ZeptoMailClient {
   ): Promise<TemplateMutationResponse> {
     await this.assertExpectedAgentName(agentKey, expectedAgentName);
     if (!input.htmlBody && !input.textBody) {
-      throw new Error('At least one of htmlBody or textBody is required.');
+      throw new Error("At least one of htmlBody or textBody is required.");
     }
 
     const body: RequestBody = {
@@ -230,10 +292,13 @@ export class ZeptoMailClient {
     if (input.htmlBody) body.htmlbody = input.htmlBody;
     if (input.textBody) body.textbody = input.textBody;
 
-    return this.request<TemplateMutationResponse>(this.templateCollectionUrl(agentKey), {
-      method: 'POST',
-      body: JSON.stringify(body),
-    });
+    return this.request<TemplateMutationResponse>(
+      this.templateCollectionUrl(agentKey),
+      {
+        method: "POST",
+        body: JSON.stringify(body),
+      },
+    );
   }
 
   async updateTemplate(
@@ -245,20 +310,24 @@ export class ZeptoMailClient {
     await this.assertExpectedAgentName(agentKey, expectedAgentName);
     const current = await this.getTemplate(agentKey, templateKey);
 
-    if (!current.modified_time || input.expectedModifiedTime !== current.modified_time) {
+    if (
+      !current.modified_time ||
+      input.expectedModifiedTime !== current.modified_time
+    ) {
       throw new Error(
         `Template changed since it was read. Expected modified_time=${input.expectedModifiedTime}, ` +
-          `current modified_time=${current.modified_time ?? '<missing>'}. Re-read before updating.`,
+          `current modified_time=${current.modified_time ?? "<missing>"}. Re-read before updating.`,
       );
     }
 
     const htmlBody = input.htmlBody ?? current.htmlbody;
     const textBody = input.textBody ?? current.textbody;
-    if (!htmlBody && !textBody) throw new Error('Update would remove both HTML and text bodies.');
+    if (!htmlBody && !textBody)
+      throw new Error("Update would remove both HTML and text bodies.");
 
     const body: RequestBody = {
       template_name: input.templateName ?? current.template_name,
-      subject: input.subject ?? current.subject ?? '',
+      subject: input.subject ?? current.subject ?? "",
     };
 
     const alias = input.templateAlias ?? current.template_alias;
@@ -266,10 +335,13 @@ export class ZeptoMailClient {
     if (htmlBody) body.htmlbody = htmlBody;
     if (textBody) body.textbody = textBody;
 
-    return this.request<TemplateMutationResponse>(this.templateUrl(agentKey, templateKey), {
-      method: 'PUT',
-      body: JSON.stringify(body),
-    });
+    return this.request<TemplateMutationResponse>(
+      this.templateUrl(agentKey, templateKey),
+      {
+        method: "PUT",
+        body: JSON.stringify(body),
+      },
+    );
   }
 
   async deleteTemplate(
@@ -289,15 +361,21 @@ export class ZeptoMailClient {
       );
     }
 
-    if (!current.modified_time || current.modified_time !== expectedModifiedTime) {
+    if (
+      !current.modified_time ||
+      current.modified_time !== expectedModifiedTime
+    ) {
       throw new Error(
         `Template changed since it was read. Expected modified_time=${expectedModifiedTime}, ` +
-          `current modified_time=${current.modified_time ?? '<missing>'}. Re-read before deleting.`,
+          `current modified_time=${current.modified_time ?? "<missing>"}. Re-read before deleting.`,
       );
     }
 
-    return this.request<TemplateMutationResponse>(this.templateUrl(agentKey, templateKey), {
-      method: 'DELETE',
-    });
+    return this.request<TemplateMutationResponse>(
+      this.templateUrl(agentKey, templateKey),
+      {
+        method: "DELETE",
+      },
+    );
   }
 }

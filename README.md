@@ -157,15 +157,16 @@ The JSON response contains `refresh_token`.
 
 ## Tools
 
-| MCP tool                    | Purpose                                              | Mutates data |
-| --------------------------- | ---------------------------------------------------- | ------------ |
-| `zeptomail_list_agents`     | List accessible Agents and exact Agent keys/aliases  | No           |
-| `zeptomail_list_templates`  | List templates in one explicit Agent                 | No           |
-| `zeptomail_find_templates`  | Search one Agent or all Agents by name/alias/subject | No           |
-| `zeptomail_get_template`    | Read one complete template from one Agent            | No           |
-| `zeptomail_create_template` | Create a template in one explicit Agent              | Yes          |
-| `zeptomail_update_template` | Partial update with Agent + stale-write protection   | Yes          |
-| `zeptomail_delete_template` | Permanent delete with Agent/name/timestamp checks    | Yes          |
+| MCP tool                     | Purpose                                                                              | Mutates data |
+| ---------------------------- | ------------------------------------------------------------------------------------ | ------------ |
+| `zeptomail_list_agents`      | List accessible Agents and exact Agent keys/aliases                                  | No           |
+| `zeptomail_list_templates`   | List templates in one explicit Agent                                                 | No           |
+| `zeptomail_find_templates`   | Search one Agent or all Agents by name/alias/subject                                 | No           |
+| `zeptomail_get_template`     | Read one complete template from one Agent                                            | No           |
+| `zeptomail_export_templates` | Dump every full template (HTML/text/subject) from one Agent as JSON for local backup | No           |
+| `zeptomail_create_template`  | Create a template in one explicit Agent                                              | Yes          |
+| `zeptomail_update_template`  | Partial update with Agent + stale-write protection                                   | Yes          |
+| `zeptomail_delete_template`  | Permanent delete with Agent/name/timestamp checks                                    | Yes          |
 
 Write tools require **both**:
 
