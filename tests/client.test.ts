@@ -28,13 +28,13 @@ function oauthResponse() {
 const agentsPayload = {
   data: [
     {
-      mailagent_name: 'Proposal.biz Production',
+      mailagent_name: 'Acme Production',
       mailagent_key: 'prod-agent',
       description: 'Production transactional email',
       status: 'active',
     },
     {
-      mailagent_name: 'Proposal.biz Staging',
+      mailagent_name: 'Acme Staging',
       mailagent_key: 'staging-agent',
       description: 'Staging transactional email',
       status: 'active',
@@ -125,9 +125,9 @@ test('findTemplates without agentKey searches Agents and returns owning Agent wi
   const matches = await client.findTemplates('team_invite', 20);
 
   assert.equal(matches.length, 2);
-  assert.equal(matches[0]!.agent.mailagent_name, 'Proposal.biz Production');
+  assert.equal(matches[0]!.agent.mailagent_name, 'Acme Production');
   assert.equal(matches[0]!.template.template_key, 'key-prod');
-  assert.equal(matches[1]!.agent.mailagent_name, 'Proposal.biz Staging');
+  assert.equal(matches[1]!.agent.mailagent_name, 'Acme Staging');
 });
 
 test('allowed Agent keys filter discovery and block direct access outside allowlist', async () => {
@@ -179,7 +179,7 @@ test('partial update validates Agent name, fetches current template and preserve
 
   const tokenProvider = new ZohoOAuthTokenProvider(config, mockFetch);
   const client = new ZeptoMailClient(config, tokenProvider, mockFetch);
-  await client.updateTemplate('prod-agent', 'key1', 'Proposal.biz Production', {
+  await client.updateTemplate('prod-agent', 'key1', 'Acme Production', {
     subject: 'New subject',
     expectedModifiedTime: '24 Aug 2026 10:00 AM',
   });
@@ -209,7 +209,7 @@ test('update refuses wrong expected Agent name before touching the template', as
   const client = new ZeptoMailClient(config, tokenProvider, mockFetch);
   await assert.rejects(
     () =>
-      client.updateTemplate('prod-agent', 'key1', 'Proposal.biz Staging', {
+      client.updateTemplate('prod-agent', 'key1', 'Acme Staging', {
         subject: 'x',
         expectedModifiedTime: 'old-time',
       }),
@@ -245,7 +245,7 @@ test('update refuses stale expectedModifiedTime', async () => {
   const client = new ZeptoMailClient(config, tokenProvider, mockFetch);
   await assert.rejects(
     () =>
-      client.updateTemplate('prod-agent', 'key1', 'Proposal.biz Production', {
+      client.updateTemplate('prod-agent', 'key1', 'Acme Production', {
         subject: 'x',
         expectedModifiedTime: 'old-time',
       }),
